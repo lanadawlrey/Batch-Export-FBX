@@ -1,1 +1,1 @@
-批量归零物体位置并以物体命名导出fbx
+This Blender Plugin allows the user to Batch Export FBX files while saving metadata such as location.
