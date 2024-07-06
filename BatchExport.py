@@ -3,11 +3,11 @@ import os
 
 bl_info = {
     "name": "Batch Export FBX",
-    "author": "Your Name",
-    "version": (1, 1),
+    "author": "lanadawlrey",
+    "version": (1, 2),
     "blender": (2, 80, 0),
     "location": "View3D > Tools",
-    "description": "Batch export selected objects as FBX with object names",
+    "description": "Batch export selected objects as FBX with object names and metadata",
     "warning": "",
     "wiki_url": "",
     "category": "Import-Export",
@@ -21,6 +21,13 @@ def select_only(obj, selected_objects):
         other_obj.select_set(False)
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
+
+def add_metadata(obj):
+    obj["original_location"] = obj.location.copy()
+
+def remove_metadata(obj):
+    if "original_location" in obj:
+        del obj["original_location"]
 
 def export_fbx(obj, directory):
     fbx_path = os.path.join(directory, obj.name + ".fbx")
@@ -41,8 +48,10 @@ class BatchExportFBXOperator(bpy.types.Operator):
         
         for obj in selected_objects:
             obj.location = (0, 0, 0)
+            add_metadata(obj)
             select_only(obj, selected_objects)
             export_fbx(obj, scene.manual_directory)
+            remove_metadata(obj)
             obj.location = original_locations[obj]
             obj.parent = original_parents[obj]
 
@@ -79,9 +88,9 @@ class SimplePanel(bpy.types.Panel):
         layout = self.layout
         row = layout.row(align=True)
 
-        row.prop(context.scene, 'manual_directory',text='')
+        row.prop(context.scene, 'manual_directory', text='')
         if hasattr(bpy.types.Scene, 'text_file_enum'):
-            row.prop_menu_enum(context.scene, 'text_file_enum',text='', icon='DOWNARROW_HLT')
+            row.prop_menu_enum(context.scene, 'text_file_enum', text='', icon='DOWNARROW_HLT')
         layout.operator("export.batch_fbx")
 
 def register():
